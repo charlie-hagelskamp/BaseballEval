@@ -9,6 +9,7 @@ CREATE TABLE evaluations (
     evaluation_type TEXT NOT NULL CHECK (evaluation_type IN ('pitching', 'infield', 'outfield', 'batting', 'catching', 'speed')),
     velocity NUMERIC(5,2) NULL, -- Only for pitching evaluations
     ratings JSONB NOT NULL, -- Array of {criteria: string, rating: number}
+    notes TEXT NULL, -- Optional notes for the evaluation
     average_score NUMERIC(3,2) NOT NULL CHECK (average_score >= 2 AND average_score <= 8),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()

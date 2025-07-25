@@ -133,6 +133,23 @@
             font-size: 16px;
         }
 
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+        }
+
         .criteria-section {
             margin-bottom: 30px;
         }
@@ -581,6 +598,113 @@
             border: 1px solid #ccc;
         }
 
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            margin: 10% auto;
+            padding: 20px;
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            color: white;
+            position: relative;
+            animation: slideIn 0.3s;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #FFD700;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .close {
+            color: #FFD700;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: white;
+        }
+
+        .modal-body {
+            color: white;
+        }
+
+        .eval-detail {
+            background: #2d2d2d;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border-left: 3px solid #FFD700;
+        }
+
+        .eval-detail-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .eval-criteria {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .clickable-cell {
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .clickable-cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+
+        .clickable-name {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .clickable-name:hover {
+            color: #FFD700 !important;
+            text-decoration: underline;
+        }
+
         .setup-notice {
             background: #2d2d1a;
             border: 2px solid #FFD700;
@@ -654,13 +778,23 @@
                 font-size: 1.8em;
                 margin-bottom: 5px;
             }
+            
+            .player-info {
+                padding: 8px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .player-info h3 {
+                font-size: 14px !important;
+                margin-bottom: 3px !important;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🦅 Northview Falcons Baseball Evaluation</h1>
+            <h1><img src="logo.png" alt="Falcons Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;"> Northview Falcons Baseball Evaluation</h1>
         </div>
 
         <div class="main-content">
@@ -672,12 +806,11 @@
                 </div>
 
                 <!-- Global Evaluator Name -->
-                <div class="player-info" style="margin-bottom: 25px;">
-                    <h3>👤 Evaluator Information</h3>
-                    <div class="input-group">
+                <div class="player-info" style="margin-bottom: 15px; padding: 10px;">
+                    <h3 style="margin-bottom: 5px; font-size: 16px;">🦅 Evaluator Name</h3>
+                    <div class="input-group" style="margin-bottom: 0;">
                         <input type="text" id="globalEvaluator" placeholder="Your Name (Coach/Evaluator)" required onchange="saveEvaluatorName()">
                     </div>
-                    <small style="color: #666;">Enter your name once - it will be saved for all evaluations</small>
                 </div>
 
                 <div class="form-selector">
@@ -726,6 +859,14 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="criteria-section">
+                        <h3>Additional Notes (Optional)</h3>
+                        <div class="input-group">
+                            <textarea id="pitching-notes" placeholder="Any additional observations, strengths, areas for improvement, etc..."></textarea>
+                        </div>
+                    </div>
+                    
                     <button class="submit-btn" onclick="submitForm('pitching')">Submit Pitching Evaluation</button>
                 </div>
 
@@ -769,6 +910,14 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="criteria-section">
+                        <h3>Additional Notes (Optional)</h3>
+                        <div class="input-group">
+                            <textarea id="infield-notes" placeholder="Any additional observations, strengths, areas for improvement, etc..."></textarea>
+                        </div>
+                    </div>
+                    
                     <button class="submit-btn" onclick="submitForm('infield')">Submit Infield Evaluation</button>
                 </div>
 
@@ -805,6 +954,14 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="criteria-section">
+                        <h3>Additional Notes (Optional)</h3>
+                        <div class="input-group">
+                            <textarea id="outfield-notes" placeholder="Any additional observations, strengths, areas for improvement, etc..."></textarea>
+                        </div>
+                    </div>
+                    
                     <button class="submit-btn" onclick="submitForm('outfield')">Submit Outfield Evaluation</button>
                 </div>
 
@@ -841,6 +998,14 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="criteria-section">
+                        <h3>Additional Notes (Optional)</h3>
+                        <div class="input-group">
+                            <textarea id="batting-notes" placeholder="Any additional observations, strengths, areas for improvement, etc..."></textarea>
+                        </div>
+                    </div>
+                    
                     <button class="submit-btn" onclick="submitForm('batting')">Submit Batting Evaluation</button>
                 </div>
 
@@ -877,6 +1042,14 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="criteria-section">
+                        <h3>Additional Notes (Optional)</h3>
+                        <div class="input-group">
+                            <textarea id="catching-notes" placeholder="Any additional observations, strengths, areas for improvement, etc..."></textarea>
+                        </div>
+                    </div>
+                    
                     <button class="submit-btn" onclick="submitForm('catching')">Submit Catching Evaluation</button>
                 </div>
 
@@ -899,6 +1072,14 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="criteria-section">
+                        <h3>Additional Notes (Optional)</h3>
+                        <div class="input-group">
+                            <textarea id="speed-notes" placeholder="Any additional observations, strengths, areas for improvement, etc..."></textarea>
+                        </div>
+                    </div>
+                    
                     <button class="submit-btn" onclick="submitForm('speed')">Submit Speed Evaluation</button>
                 </div>
 
@@ -908,7 +1089,7 @@
 
             <!-- Data Viewing Section -->
             <div class="data-section">
-                <h3>🦅 Northview Falcons - Live Player Evaluations</h3>
+                <h3><img src="logo.png" alt="Falcons Logo" style="height: 24px; vertical-align: middle; margin-right: 8px;"> Northview Falcons - Live Player Evaluations</h3>
                 
                 <div id="statsSection" class="stats-summary" style="display: none;">
                     <h4>Summary Statistics</h4>
@@ -1007,6 +1188,19 @@
                                 <tr><td colspan="8" class="loading">Loading heatmap...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Modal for evaluation details -->
+                <div id="evaluationModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="modal-title" id="modalTitle">Evaluation Details</div>
+                            <span class="close" onclick="closeModal()">&times;</span>
+                        </div>
+                        <div class="modal-body" id="modalBody">
+                            Loading...
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1146,6 +1340,10 @@
                 // Calculate average score (exclude velocity from average)
                 const averageScore = (ratings.reduce((sum, item) => sum + item.rating, 0) / ratings.length).toFixed(2);
                 
+                // Get notes
+                const notesInput = document.getElementById(formType + '-notes');
+                const notes = notesInput ? notesInput.value.trim() : '';
+                
                 // Create evaluation object for pitching
                 const evaluation = {
                     player_name: nameInput.value.trim(),
@@ -1154,6 +1352,7 @@
                     velocity: velocity,
                     ratings: ratings,
                     average_score: parseFloat(averageScore),
+                    notes: notes,
                     created_at: new Date().toISOString()
                 };
                 
@@ -1191,6 +1390,10 @@
                     time: time
                 }];
                 
+                // Get notes
+                const notesInput = document.getElementById(formType + '-notes');
+                const notes = notesInput ? notesInput.value.trim() : '';
+                
                 // Create evaluation object for speed
                 const evaluation = {
                     player_name: nameInput.value.trim(),
@@ -1198,6 +1401,7 @@
                     evaluation_type: formType,
                     ratings: ratings,
                     average_score: score,
+                    notes: notes,
                     created_at: new Date().toISOString()
                 };
                 
@@ -1231,6 +1435,10 @@
                 // Calculate average score
                 const averageScore = (ratings.reduce((sum, item) => sum + item.rating, 0) / ratings.length).toFixed(2);
                 
+                // Get notes
+                const notesInput = document.getElementById(formType + '-notes');
+                const notes = notesInput ? notesInput.value.trim() : '';
+                
                 // Create evaluation object
                 const evaluation = {
                     player_name: nameInput.value.trim(),
@@ -1238,6 +1446,7 @@
                     evaluation_type: formType,
                     ratings: ratings,
                     average_score: parseFloat(averageScore),
+                    notes: notes,
                     created_at: new Date().toISOString()
                 };
                 
@@ -1278,6 +1487,9 @@
                     if (input.type === 'text' || input.type === 'number') {
                         input.value = '';
                     }
+                });
+                form.querySelectorAll('textarea').forEach(textarea => {
+                    textarea.value = '';
                 });
                 
                 // Refresh evaluations list
@@ -1565,6 +1777,7 @@
 
                     profileHTML += `
                             </div>
+                            ${evaluation.notes ? `<div style="margin-top: 8px; padding: 8px; background: #e0e0e0; border-radius: 3px; font-style: italic; color: #000000;"><strong>Notes:</strong> ${evaluation.notes}</div>` : ''}
                             <div style="text-align: right; margin-top: 5px;">
                                 <strong style="color: #000000;">Score: ${evaluation.average_score.toFixed(1)}/8</strong>
                             </div>
@@ -1633,13 +1846,13 @@
             
             let heatmapHTML = '';
             data.forEach(player => {
-                let row = `<tr><td class="player-name-col">${player.name}</td>`;
+                let row = `<tr><td class="player-name-col clickable-name" onclick="openPlayerProfile('${player.name}')">${player.name}</td>`;
                 
                 evalTypes.forEach(type => {
                     const score = player.scores[type];
                     if (score > 0) {
                         const cellClass = getScoreClass(score);
-                        row += `<td class="score-cell ${cellClass}">${score.toFixed(1)}</td>`;
+                        row += `<td class="score-cell ${cellClass} clickable-cell" onclick="openEvaluationModal('${player.name}', '${type}')">${score.toFixed(1)}</td>`;
                     } else {
                         row += `<td class="score-cell score-missing">-</td>`;
                     }
@@ -1706,6 +1919,100 @@
             if (score >= 5.5) return 'score-average';
             if (score >= 4.5) return 'score-below';
             return 'score-poor';
+        }
+
+        // Open player profile from heatmap
+        function openPlayerProfile(playerName) {
+            // Switch to player profile tab
+            switchView('player');
+            
+            // Set the player in the dropdown
+            const playerSelect = document.getElementById('playerSelect');
+            playerSelect.value = playerName;
+            
+            // Load the profile
+            loadPlayerProfile();
+        }
+
+        // Open evaluation detail modal
+        function openEvaluationModal(playerName, evaluationType) {
+            const modal = document.getElementById('evaluationModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            // Set title
+            modalTitle.textContent = `${playerName} - ${evaluationType.charAt(0).toUpperCase() + evaluationType.slice(1)}`;
+            
+            // Get evaluations for this player and type
+            const playerEvals = allEvaluations.filter(eval => 
+                eval.player_name === playerName && eval.evaluation_type === evaluationType
+            );
+            
+            if (playerEvals.length === 0) {
+                modalBody.innerHTML = '<p>No evaluations found for this player and skill area.</p>';
+            } else {
+                // Calculate average
+                const avgScore = (playerEvals.reduce((sum, eval) => sum + eval.average_score, 0) / playerEvals.length).toFixed(1);
+                
+                let modalHTML = `
+                    <div style="text-align: center; margin-bottom: 15px; padding: 10px; background: #2d2d2d; border-radius: 5px;">
+                        <strong>Average Score: ${avgScore}/8</strong>
+                        <br><small>${playerEvals.length} evaluation${playerEvals.length > 1 ? 's' : ''}</small>
+                    </div>
+                `;
+                
+                // Show each evaluation
+                playerEvals.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).forEach((evaluation, index) => {
+                    modalHTML += `
+                        <div class="eval-detail">
+                            <div class="eval-detail-header">
+                                <span>Evaluator: ${evaluation.evaluator_name || 'Unknown'}</span>
+                                <span>${evaluation.average_score.toFixed(1)}/8</span>
+                            </div>
+                            <div style="font-size: 12px; color: #999; margin-bottom: 8px;">
+                                ${new Date(evaluation.created_at).toLocaleDateString()}
+                            </div>
+                            <div class="eval-criteria">
+                    `;
+                    
+                    // Show specific ratings
+                    if (evaluation.velocity) {
+                        modalHTML += `<div>Velocity: ${evaluation.velocity} MPH</div>`;
+                    }
+                    
+                    evaluation.ratings.forEach(rating => {
+                        if (rating.time) {
+                            modalHTML += `<div>${rating.criteria}: ${rating.time}s (${rating.rating}/8)</div>`;
+                        } else {
+                            modalHTML += `<div>${rating.criteria}: ${rating.rating}/8</div>`;
+                        }
+                    });
+                    
+                    modalHTML += `
+                            </div>
+                            ${evaluation.notes ? `<div style="margin-top: 8px; padding: 8px; background: #3d3d3d; border-radius: 3px; font-style: italic; color: #ccc;"><strong style="color: #FFD700;">Notes:</strong> ${evaluation.notes}</div>` : ''}
+                        </div>
+                    `;
+                });
+                
+                modalBody.innerHTML = modalHTML;
+            }
+            
+            // Show modal
+            modal.style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('evaluationModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('evaluationModal');
+            if (event.target === modal) {
+                closeModal();
+            }
         }
 
         // Setup real-time subscriptions
