@@ -575,28 +575,6 @@
             color: white;
         }
 
-        .legend {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 12px;
-            color: white;
-        }
-
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
 
         /* Modal Styles */
         .modal {
@@ -1140,9 +1118,6 @@
 
                 <!-- Heatmap View -->
                 <div id="heatmapView" class="view-content">
-                    <div id="heatmapLegend" class="legend">
-                        <!-- Legend will be dynamically updated -->
-                    </div>
                     <div class="heatmap-container">
                         <table id="heatmapTable" class="heatmap-table">
                             <thead>
@@ -1816,7 +1791,6 @@
 
             // Recalculate ranges for sorted data
             const scoreRanges = calculateDynamicRanges(sortedData);
-            updateLegend(scoreRanges);
             renderHeatmapTable(sortedData, scoreRanges);
         }
 
@@ -1920,7 +1894,6 @@
             // Calculate dynamic score ranges for better visualization
             const scoreRanges = calculateDynamicRanges(heatmapData);
             
-            updateLegend(scoreRanges);
             renderHeatmapTable(heatmapData, scoreRanges);
         }
 
