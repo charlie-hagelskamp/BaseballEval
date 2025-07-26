@@ -1176,6 +1176,7 @@
                                 <tr>
                                     <th class="player-name-col sortable" onclick="sortHeatmap('name')">Player Name</th>
                                     <th class="sortable" onclick="sortHeatmap('pitching')">Pitching</th>
+                                    <th class="sortable" onclick="sortHeatmap('velocity')">Velocity</th>
                                     <th class="sortable" onclick="sortHeatmap('infield')">Infield</th>
                                     <th class="sortable" onclick="sortHeatmap('outfield')">Outfield</th>
                                     <th class="sortable" onclick="sortHeatmap('batting')">Batting</th>
@@ -1185,7 +1186,7 @@
                                 </tr>
                             </thead>
                             <tbody id="heatmapBody">
-                                <tr><td colspan="8" class="loading">Loading heatmap...</td></tr>
+                                <tr><td colspan="9" class="loading">Loading heatmap...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1825,6 +1826,9 @@
                 } else if (column === 'overall') {
                     valueA = a.overall || 0;
                     valueB = b.overall || 0;
+                } else if (column === 'velocity') {
+                    valueA = a.velocity || 0;
+                    valueB = b.velocity || 0;
                 } else {
                     valueA = a.scores[column] || 0;
                     valueB = b.scores[column] || 0;
@@ -1848,7 +1852,25 @@
             data.forEach(player => {
                 let row = `<tr><td class="player-name-col clickable-name" onclick="openPlayerProfile('${player.name}')">${player.name}</td>`;
                 
-                evalTypes.forEach(type => {
+                // Add pitching score
+                const pitchingScore = player.scores['pitching'];
+                if (pitchingScore > 0) {
+                    const cellClass = getScoreClass(pitchingScore);
+                    row += `<td class="score-cell ${cellClass} clickable-cell" onclick="openEvaluationModal('${player.name}', 'pitching')">${pitchingScore.toFixed(1)}</td>`;
+                } else {
+                    row += `<td class="score-cell score-missing">-</td>`;
+                }
+                
+                // Add velocity column
+                if (player.velocity > 0) {
+                    row += `<td class="score-cell" style="background: #4a90e2; color: white;">${player.velocity.toFixed(1)} MPH</td>`;
+                } else {
+                    row += `<td class="score-cell score-missing">-</td>`;
+                }
+                
+                // Add remaining evaluation types (skip pitching since we already added it)
+                const remainingTypes = ['infield', 'outfield', 'batting', 'catching', 'speed'];
+                remainingTypes.forEach(type => {
                     const score = player.scores[type];
                     if (score > 0) {
                         const cellClass = getScoreClass(score);
@@ -1872,7 +1894,7 @@
         // Generate heatmap for all players
         function generateHeatmap() {
             if (!allEvaluations.length) {
-                document.getElementById('heatmapBody').innerHTML = '<tr><td colspan="8" class="loading">No evaluations available</td></tr>';
+                document.getElementById('heatmapBody').innerHTML = '<tr><td colspan="9" class="loading">No evaluations available</td></tr>';
                 return;
             }
 
@@ -1885,6 +1907,7 @@
                 const playerData = {
                     name: player,
                     scores: {},
+                    velocity: 0,
                     overall: 0
                 };
                 
@@ -1899,6 +1922,14 @@
                         playerData.scores[type] = avgScore;
                         totalScore += avgScore;
                         evalCount++;
+                        
+                        // Track velocity for pitching evaluations
+                        if (type === 'pitching') {
+                            const velocityEvals = typeEvals.filter(eval => eval.velocity > 0);
+                            if (velocityEvals.length > 0) {
+                                playerData.velocity = velocityEvals.reduce((sum, eval) => sum + eval.velocity, 0) / velocityEvals.length;
+                            }
+                        }
                     } else {
                         playerData.scores[type] = 0;
                     }
