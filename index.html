@@ -17,11 +17,6 @@
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
             min-height: 100vh;
             padding: 20px;
-            visibility: hidden;
-        }
-
-        body.loaded {
-            visibility: visible;
         }
 
         .container {
@@ -53,8 +48,7 @@
         }
 
         .main-content {
-            display: flex;
-            flex-direction: column;
+            display: block;
             min-height: 600px;
         }
 
@@ -62,8 +56,6 @@
             padding: 40px;
             border-bottom: 2px solid #FFD700;
             margin-bottom: 20px;
-            order: 1;
-            flex-shrink: 0;
         }
 
         .data-section {
@@ -72,8 +64,6 @@
             border: 3px solid #FFD700;
             margin: 20px 0;
             border-radius: 10px;
-            order: 2;
-            flex-shrink: 0;
         }
 
         .form-selector {
@@ -2187,9 +2177,6 @@
 
         // Initialize when page loads
         window.addEventListener('DOMContentLoaded', function() {
-            // Show the page to prevent layout flash
-            document.body.classList.add('loaded');
-            
             // Load saved evaluator name
             loadEvaluatorName();
             
