@@ -1144,31 +1144,8 @@
 
                 <!-- Heatmap View -->
                 <div id="heatmapView" class="view-content">
-                    <div class="legend">
-                        <div class="legend-item">
-                            <div class="legend-color score-excellent"></div>
-                            <span>Excellent (7.5-8.0)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color score-good"></div>
-                            <span>Good (6.5-7.4)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color score-average"></div>
-                            <span>Average (5.5-6.4)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color score-below"></div>
-                            <span>Below Avg (4.5-5.4)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color score-poor"></div>
-                            <span>Poor (2.0-4.4)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color score-missing"></div>
-                            <span>Not Evaluated</span>
-                        </div>
+                    <div id="heatmapLegend" class="legend">
+                        <!-- Legend will be dynamically updated -->
                     </div>
                     <div class="heatmap-container">
                         <table id="heatmapTable" class="heatmap-table">
@@ -1841,11 +1818,14 @@
                 }
             });
 
-            renderHeatmapTable(sortedData);
+            // Recalculate ranges for sorted data
+            const scoreRanges = calculateDynamicRanges(sortedData);
+            updateLegend(scoreRanges);
+            renderHeatmapTable(sortedData, scoreRanges);
         }
 
         // Render heatmap table
-        function renderHeatmapTable(data) {
+        function renderHeatmapTable(data, scoreRanges) {
             const evalTypes = ['pitching', 'infield', 'outfield', 'batting', 'catching', 'speed'];
             
             let heatmapHTML = '';
@@ -1855,7 +1835,7 @@
                 // Add pitching score
                 const pitchingScore = player.scores['pitching'];
                 if (pitchingScore > 0) {
-                    const cellClass = getScoreClass(pitchingScore);
+                    const cellClass = getScoreClass(pitchingScore, scoreRanges);
                     row += `<td class="score-cell ${cellClass} clickable-cell" onclick="openEvaluationModal('${player.name}', 'pitching')">${pitchingScore.toFixed(1)}</td>`;
                 } else {
                     row += `<td class="score-cell score-missing">-</td>`;
@@ -1873,7 +1853,7 @@
                 remainingTypes.forEach(type => {
                     const score = player.scores[type];
                     if (score > 0) {
-                        const cellClass = getScoreClass(score);
+                        const cellClass = getScoreClass(score, scoreRanges);
                         row += `<td class="score-cell ${cellClass} clickable-cell" onclick="openEvaluationModal('${player.name}', '${type}')">${score.toFixed(1)}</td>`;
                     } else {
                         row += `<td class="score-cell score-missing">-</td>`;
@@ -1881,7 +1861,7 @@
                 });
 
                 // Overall average
-                const overallClass = player.overall > 0 ? getScoreClass(player.overall) : 'score-missing';
+                const overallClass = player.overall > 0 ? getScoreClass(player.overall, scoreRanges) : 'score-missing';
                 row += `<td class="score-cell overall-avg ${overallClass}">${player.overall > 0 ? player.overall.toFixed(1) : '-'}</td>`;
                 
                 row += '</tr>';
@@ -1940,16 +1920,83 @@
                 return playerData;
             });
 
-            renderHeatmapTable(heatmapData);
+            // Calculate dynamic score ranges for better visualization
+            const scoreRanges = calculateDynamicRanges(heatmapData);
+            
+            updateLegend(scoreRanges);
+            renderHeatmapTable(heatmapData, scoreRanges);
         }
 
-        // Get CSS class for score color coding
-        function getScoreClass(score) {
-            if (score >= 7.5) return 'score-excellent';
-            if (score >= 6.5) return 'score-good';
-            if (score >= 5.5) return 'score-average';
-            if (score >= 4.5) return 'score-below';
+        // Calculate dynamic score ranges based on actual data
+        function calculateDynamicRanges(data) {
+            const allScores = [];
+            
+            // Collect all non-zero scores
+            data.forEach(player => {
+                Object.values(player.scores).forEach(score => {
+                    if (score > 0) allScores.push(score);
+                });
+                if (player.overall > 0) allScores.push(player.overall);
+            });
+            
+            if (allScores.length === 0) {
+                return { min: 2, max: 8, ranges: [2, 3.2, 4.4, 5.6, 6.8, 8] };
+            }
+            
+            allScores.sort((a, b) => a - b);
+            const min = allScores[0];
+            const max = allScores[allScores.length - 1];
+            const range = max - min;
+            
+            // Create 5 equal ranges
+            const ranges = [
+                min,
+                min + range * 0.2,
+                min + range * 0.4,
+                min + range * 0.6,
+                min + range * 0.8,
+                max
+            ];
+            
+            return { min, max, ranges };
+        }
+
+        // Get CSS class for score color coding using dynamic ranges
+        function getScoreClass(score, scoreRanges) {
+            if (!scoreRanges || score <= 0) return 'score-missing';
+            
+            const { ranges } = scoreRanges;
+            if (score >= ranges[4]) return 'score-excellent';
+            if (score >= ranges[3]) return 'score-good';
+            if (score >= ranges[2]) return 'score-average';
+            if (score >= ranges[1]) return 'score-below';
             return 'score-poor';
+        }
+
+        // Update legend with dynamic score ranges
+        function updateLegend(scoreRanges) {
+            const legendContainer = document.getElementById('heatmapLegend');
+            if (!scoreRanges) {
+                legendContainer.innerHTML = '<div class="legend-item"><span>No data available</span></div>';
+                return;
+            }
+            
+            const { ranges } = scoreRanges;
+            const legendItems = [
+                { class: 'score-excellent', label: `Excellent (${ranges[4].toFixed(1)} - ${ranges[5].toFixed(1)})` },
+                { class: 'score-good', label: `Good (${ranges[3].toFixed(1)} - ${ranges[4].toFixed(1)})` },
+                { class: 'score-average', label: `Average (${ranges[2].toFixed(1)} - ${ranges[3].toFixed(1)})` },
+                { class: 'score-below', label: `Below Avg (${ranges[1].toFixed(1)} - ${ranges[2].toFixed(1)})` },
+                { class: 'score-poor', label: `Poor (${ranges[0].toFixed(1)} - ${ranges[1].toFixed(1)})` },
+                { class: 'score-missing', label: 'Not Evaluated' }
+            ];
+            
+            legendContainer.innerHTML = legendItems.map(item => `
+                <div class="legend-item">
+                    <div class="legend-color ${item.class}"></div>
+                    <span>${item.label}</span>
+                </div>
+            `).join('');
         }
 
         // Open player profile from heatmap
