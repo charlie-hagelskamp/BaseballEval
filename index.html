@@ -48,7 +48,8 @@
         }
 
         .main-content {
-            display: block;
+            display: flex;
+            flex-direction: column;
             min-height: 600px;
         }
 
@@ -56,6 +57,7 @@
             padding: 40px;
             border-bottom: 2px solid #FFD700;
             margin-bottom: 20px;
+            order: 1;
         }
 
         .data-section {
@@ -64,6 +66,7 @@
             border: 3px solid #FFD700;
             margin: 20px 0;
             border-radius: 10px;
+            order: 2;
         }
 
         .form-selector {
