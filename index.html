@@ -1843,7 +1843,8 @@
                 
                 // Add velocity column
                 if (player.velocity > 0) {
-                    row += `<td class="score-cell" style="background: #4a90e2; color: white;">${player.velocity.toFixed(1)} MPH</td>`;
+                    const velocityClass = getVelocityClass(player.velocity, scoreRanges);
+                    row += `<td class="score-cell ${velocityClass}">${player.velocity.toFixed(1)} MPH</td>`;
                 } else {
                     row += `<td class="score-cell score-missing">-</td>`;
                 }
@@ -1930,42 +1931,68 @@
         // Calculate dynamic score ranges based on actual data
         function calculateDynamicRanges(data) {
             const allScores = [];
+            const allVelocities = [];
             
-            // Collect all non-zero scores
+            // Collect all non-zero scores and velocities
             data.forEach(player => {
                 Object.values(player.scores).forEach(score => {
                     if (score > 0) allScores.push(score);
                 });
                 if (player.overall > 0) allScores.push(player.overall);
+                if (player.velocity > 0) allVelocities.push(player.velocity);
             });
             
+            // Calculate score ranges
+            let scoreRanges;
             if (allScores.length === 0) {
-                return { min: 2, max: 8, ranges: [2, 3.2, 4.4, 5.6, 6.8, 8] };
+                scoreRanges = [2, 3.2, 4.4, 5.6, 6.8, 8];
+            } else {
+                allScores.sort((a, b) => a - b);
+                const min = allScores[0];
+                const max = allScores[allScores.length - 1];
+                const range = max - min;
+                
+                scoreRanges = [
+                    min,
+                    min + range * 0.2,
+                    min + range * 0.4,
+                    min + range * 0.6,
+                    min + range * 0.8,
+                    max
+                ];
             }
             
-            allScores.sort((a, b) => a - b);
-            const min = allScores[0];
-            const max = allScores[allScores.length - 1];
-            const range = max - min;
+            // Calculate velocity ranges
+            let velocityRanges;
+            if (allVelocities.length === 0) {
+                velocityRanges = [60, 65, 70, 75, 80, 85];
+            } else {
+                allVelocities.sort((a, b) => a - b);
+                const vMin = allVelocities[0];
+                const vMax = allVelocities[allVelocities.length - 1];
+                const vRange = vMax - vMin;
+                
+                velocityRanges = [
+                    vMin,
+                    vMin + vRange * 0.2,
+                    vMin + vRange * 0.4,
+                    vMin + vRange * 0.6,
+                    vMin + vRange * 0.8,
+                    vMax
+                ];
+            }
             
-            // Create 5 equal ranges
-            const ranges = [
-                min,
-                min + range * 0.2,
-                min + range * 0.4,
-                min + range * 0.6,
-                min + range * 0.8,
-                max
-            ];
-            
-            return { min, max, ranges };
+            return { 
+                score: { min: allScores[0] || 2, max: allScores[allScores.length - 1] || 8, ranges: scoreRanges },
+                velocity: { min: allVelocities[0] || 60, max: allVelocities[allVelocities.length - 1] || 85, ranges: velocityRanges }
+            };
         }
 
         // Get CSS class for score color coding using dynamic ranges
-        function getScoreClass(score, scoreRanges) {
-            if (!scoreRanges || score <= 0) return 'score-missing';
+        function getScoreClass(score, rangeData) {
+            if (!rangeData || score <= 0) return 'score-missing';
             
-            const { ranges } = scoreRanges;
+            const { ranges } = rangeData.score;
             if (score >= ranges[4]) return 'score-excellent';
             if (score >= ranges[3]) return 'score-good';
             if (score >= ranges[2]) return 'score-average';
@@ -1973,15 +2000,28 @@
             return 'score-poor';
         }
 
+        // Get CSS class for velocity color coding using dynamic ranges
+        function getVelocityClass(velocity, rangeData) {
+            if (!rangeData || velocity <= 0) return 'score-missing';
+            
+            const { ranges } = rangeData.velocity;
+            if (velocity >= ranges[4]) return 'score-excellent';
+            if (velocity >= ranges[3]) return 'score-good';
+            if (velocity >= ranges[2]) return 'score-average';
+            if (velocity >= ranges[1]) return 'score-below';
+            return 'score-poor';
+        }
+
         // Update legend with dynamic score ranges
-        function updateLegend(scoreRanges) {
+        function updateLegend(rangeData) {
             const legendContainer = document.getElementById('heatmapLegend');
-            if (!scoreRanges) {
+            if (!rangeData) {
                 legendContainer.innerHTML = '<div class="legend-item"><span>No data available</span></div>';
                 return;
             }
             
-            const { ranges } = scoreRanges;
+            const { ranges } = rangeData.score;
+            const { ranges: vRanges } = rangeData.velocity;
             const legendItems = [
                 { class: 'score-excellent', label: `Excellent (${ranges[4].toFixed(1)} - ${ranges[5].toFixed(1)})` },
                 { class: 'score-good', label: `Good (${ranges[3].toFixed(1)} - ${ranges[4].toFixed(1)})` },
@@ -1991,12 +2031,36 @@
                 { class: 'score-missing', label: 'Not Evaluated' }
             ];
             
-            legendContainer.innerHTML = legendItems.map(item => `
+            legendContainer.innerHTML = `
+                <div style="margin-bottom: 10px;"><strong style="color: white;">Score Ranges:</strong></div>
+                ${legendItems.map(item => `
+                    <div class="legend-item">
+                        <div class="legend-color ${item.class}"></div>
+                        <span>${item.label}</span>
+                    </div>
+                `).join('')}
+                <div style="margin: 15px 0 5px 0;"><strong style="color: white;">Velocity Ranges (MPH):</strong></div>
                 <div class="legend-item">
-                    <div class="legend-color ${item.class}"></div>
-                    <span>${item.label}</span>
+                    <div class="legend-color score-excellent"></div>
+                    <span>Excellent (${vRanges[4].toFixed(1)} - ${vRanges[5].toFixed(1)})</span>
                 </div>
-            `).join('');
+                <div class="legend-item">
+                    <div class="legend-color score-good"></div>
+                    <span>Good (${vRanges[3].toFixed(1)} - ${vRanges[4].toFixed(1)})</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color score-average"></div>
+                    <span>Average (${vRanges[2].toFixed(1)} - ${vRanges[3].toFixed(1)})</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color score-below"></div>
+                    <span>Below Avg (${vRanges[1].toFixed(1)} - ${vRanges[2].toFixed(1)})</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color score-poor"></div>
+                    <span>Poor (${vRanges[0].toFixed(1)} - ${vRanges[1].toFixed(1)})</span>
+                </div>
+            `;
         }
 
         // Open player profile from heatmap
