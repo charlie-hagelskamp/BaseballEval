@@ -34,7 +34,7 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ evaluations, loadi
 
   // Get unique players for dropdown
   const players = useMemo(() => {
-    const uniquePlayers = Array.from(new Set(evaluations.map(eval => eval.player_name))).sort();
+    const uniquePlayers = Array.from(new Set(evaluations.map(evaluation => evaluation.player_name))).sort();
     return uniquePlayers.map(name => ({ value: name, label: name }));
   }, [evaluations]);
 
@@ -42,7 +42,7 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ evaluations, loadi
   const playerEvaluations = useMemo(() => {
     if (!selectedPlayer) return [];
     return evaluations
-      .filter(eval => eval.player_name === selectedPlayer)
+      .filter(evaluation => evaluation.player_name === selectedPlayer)
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [evaluations, selectedPlayer]);
 
@@ -51,16 +51,16 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ evaluations, loadi
     if (!selectedPlayer) return {};
     
     const evalsByType = evaluations
-      .filter(eval => eval.player_name === selectedPlayer)
-      .reduce((acc, eval) => {
-        if (!acc[eval.evaluation_type]) acc[eval.evaluation_type] = [];
-        acc[eval.evaluation_type].push(eval);
+      .filter(evaluation => evaluation.player_name === selectedPlayer)
+      .reduce((acc, evaluation) => {
+        if (!acc[evaluation.evaluation_type]) acc[evaluation.evaluation_type] = [];
+        acc[evaluation.evaluation_type].push(evaluation);
         return acc;
       }, {} as Record<string, Evaluation[]>);
 
     const averages: Record<string, number> = {};
     Object.entries(evalsByType).forEach(([type, evals]) => {
-      const sum = evals.reduce((total, eval) => total + eval.average_score, 0);
+      const sum = evals.reduce((total, evaluation) => total + evaluation.average_score, 0);
       averages[type] = sum / evals.length;
     });
 
