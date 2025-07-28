@@ -74,15 +74,17 @@ export const BaseballEvaluationSystem: React.FC = () => {
               fontSize: '16px',
               fontWeight: 600,
               padding: '12px 20px',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 215, 0, 0.2)',
-                borderColor: '#FFD700',
-                color: '#000000'
+              backgroundColor: 'transparent',
+              border: '1px solid transparent',
+              '&:hover:not([data-active])': {
+                backgroundColor: 'rgba(255, 215, 0, 0.3) !important',
+                borderColor: '#FFD700 !important',
+                color: '#000000 !important'
               },
               '&[data-active]': {
-                color: '#000000',
-                backgroundColor: '#FFD700',
-                borderColor: '#FFD700'
+                color: '#000000 !important',
+                backgroundColor: '#FFD700 !important',
+                borderColor: '#FFD700 !important'
               }
             }
           }}
