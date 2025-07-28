@@ -1,7 +1,7 @@
 {
   "name": "baseball-eval-react",
   "version": "0.1.0",
-  "homepage": "https://charlie-hagelskamp.github.io/BaseballEval/baseball-eval-react",
+  "homepage": "https://charlie-hagelskamp.github.io/BaseballEval",
   "private": true,
   "dependencies": {
     "@mantine/core": "^8.2.1",
