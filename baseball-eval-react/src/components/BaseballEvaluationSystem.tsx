@@ -62,7 +62,30 @@ export const BaseballEvaluationSystem: React.FC = () => {
           </Title>
         </Group>
 
-        <Tabs defaultValue="recent" color="yellow">
+        <Tabs 
+          defaultValue="recent" 
+          color="yellow"
+          styles={{
+            list: {
+              borderBottom: '2px solid #FFD700'
+            },
+            tab: {
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: 600,
+              padding: '12px 20px',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                borderColor: '#FFD700'
+              },
+              '&[data-active]': {
+                color: '#000000',
+                backgroundColor: '#FFD700',
+                borderColor: '#FFD700'
+              }
+            }
+          }}
+        >
           <Tabs.List>
             <Tabs.Tab value="recent" leftSection={<IconChartBar size={16} />}>
               Recent Evaluations
