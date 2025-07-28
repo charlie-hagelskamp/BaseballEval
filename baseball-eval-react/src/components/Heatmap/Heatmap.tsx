@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Table, Text, Loader, Stack, Group, ActionIcon } from '@mantine/core';
-import { IconArrowUp, IconArrowDown, IconArrowsSort } from '@tabler/icons-react';
+import { Table, Text, Loader, Stack, Group, ActionIcon, Modal, Badge, Paper, Title, Divider } from '@mantine/core';
+import { IconArrowUp, IconArrowDown, IconArrowsSort, IconUser, IconCalendar } from '@tabler/icons-react';
 import { Evaluation, Player } from '../../types/evaluation';
 import { processPlayersData, calculateDynamicRanges, getScoreColor, getVelocityColor } from '../../utils/scoring';
 
@@ -15,6 +15,12 @@ type SortDirection = 'asc' | 'desc' | 'none';
 export const Heatmap: React.FC<HeatmapProps> = ({ evaluations, loading }) => {
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [modalOpened, setModalOpened] = useState(false);
+  const [selectedPlayerDetails, setSelectedPlayerDetails] = useState<{
+    playerName: string;
+    evaluationType: string;
+    evaluations: Evaluation[];
+  } | null>(null);
 
   const { players, scoreRanges } = useMemo(() => {
     const playersData = processPlayersData(evaluations);
@@ -70,7 +76,29 @@ export const Heatmap: React.FC<HeatmapProps> = ({ evaluations, loading }) => {
     return <IconArrowsSort size={14} />;
   };
 
-  const ScoreCell: React.FC<{ score: number; isVelocity?: boolean }> = ({ score, isVelocity = false }) => {
+  const handleCellClick = (playerName: string, evaluationType: string) => {
+    if (evaluationType === 'name' || evaluationType === 'overall') return;
+    
+    const playerEvals = evaluations.filter(
+      eval => eval.player_name === playerName && eval.evaluation_type === evaluationType
+    );
+    
+    if (playerEvals.length > 0) {
+      setSelectedPlayerDetails({
+        playerName,
+        evaluationType,
+        evaluations: playerEvals.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      });
+      setModalOpened(true);
+    }
+  };
+
+  const ScoreCell: React.FC<{ 
+    score: number; 
+    isVelocity?: boolean; 
+    playerName: string; 
+    evaluationType: string; 
+  }> = ({ score, isVelocity = false, playerName, evaluationType }) => {
     if (score <= 0) {
       return (
         <td style={{ backgroundColor: '#6b7280', color: 'white', textAlign: 'center', padding: '8px' }}>
@@ -93,6 +121,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ evaluations, loading }) => {
           padding: '8px',
           cursor: 'pointer'
         }}
+        onClick={() => handleCellClick(playerName, evaluationType)}
       >
         {isVelocity ? `${score.toFixed(1)} MPH` : score.toFixed(1)}
       </td>
@@ -185,13 +214,13 @@ export const Heatmap: React.FC<HeatmapProps> = ({ evaluations, loading }) => {
                 >
                   {player.name}
                 </Table.Td>
-                <ScoreCell score={player.scores.pitching || 0} />
-                <ScoreCell score={player.velocity} isVelocity />
-                <ScoreCell score={player.scores.infield || 0} />
-                <ScoreCell score={player.scores.outfield || 0} />
-                <ScoreCell score={player.scores.batting || 0} />
-                <ScoreCell score={player.scores.catching || 0} />
-                <ScoreCell score={player.scores.speed || 0} />
+                <ScoreCell score={player.scores.pitching || 0} playerName={player.name} evaluationType="pitching" />
+                <ScoreCell score={player.velocity} isVelocity playerName={player.name} evaluationType="pitching" />
+                <ScoreCell score={player.scores.infield || 0} playerName={player.name} evaluationType="infield" />
+                <ScoreCell score={player.scores.outfield || 0} playerName={player.name} evaluationType="outfield" />
+                <ScoreCell score={player.scores.batting || 0} playerName={player.name} evaluationType="batting" />
+                <ScoreCell score={player.scores.catching || 0} playerName={player.name} evaluationType="catching" />
+                <ScoreCell score={player.scores.speed || 0} playerName={player.name} evaluationType="speed" />
                 <Table.Td
                   style={{
                     backgroundColor: player.overall > 0 ? getScoreColor(player.overall, scoreRanges) : '#6b7280',
@@ -210,6 +239,103 @@ export const Heatmap: React.FC<HeatmapProps> = ({ evaluations, loading }) => {
           </Table.Tbody>
         </Table>
       </div>
+
+      {/* Score Details Modal */}
+      <Modal
+        opened={modalOpened}
+        onClose={() => setModalOpened(false)}
+        title={
+          selectedPlayerDetails && (
+            <Group>
+              <IconUser size={20} />
+              <Text fw={600}>
+                {selectedPlayerDetails.playerName} - {selectedPlayerDetails.evaluationType.charAt(0).toUpperCase() + selectedPlayerDetails.evaluationType.slice(1)} Evaluations
+              </Text>
+            </Group>
+          )
+        }
+        size="lg"
+        styles={{
+          title: { fontSize: '18px', fontWeight: 600 }
+        }}
+      >
+        {selectedPlayerDetails && (
+          <Stack gap="md">
+            <Paper p="sm" style={{ backgroundColor: '#f8f9fa', border: '1px solid #ddd' }}>
+              <Group justify="space-between">
+                <Text fw={600} c="black">
+                  Total Evaluations: {selectedPlayerDetails.evaluations.length}
+                </Text>
+                <Badge color="blue" size="lg">
+                  Avg: {(selectedPlayerDetails.evaluations.reduce((sum, eval) => sum + eval.average_score, 0) / selectedPlayerDetails.evaluations.length).toFixed(1)}
+                </Badge>
+              </Group>
+            </Paper>
+
+            <Divider />
+
+            <Stack gap="sm">
+              {selectedPlayerDetails.evaluations.map((evaluation, index) => (
+                <Paper key={evaluation.id} p="md" style={{ backgroundColor: 'rgba(248, 249, 250, 0.95)', border: '1px solid #ddd' }}>
+                  <Group justify="space-between" mb="sm">
+                    <Group>
+                      <IconCalendar size={16} />
+                      <Text size="sm" c="dimmed">
+                        {new Date(evaluation.created_at).toLocaleDateString()} at{' '}
+                        {new Date(evaluation.created_at).toLocaleTimeString([], { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </Text>
+                    </Group>
+                    <Group>
+                      <Text fw={700} c="black">
+                        Score: {evaluation.average_score.toFixed(1)}
+                      </Text>
+                      {evaluation.velocity && evaluation.velocity > 0 && (
+                        <Text fw={600} c="blue">
+                          {evaluation.velocity.toFixed(1)} MPH
+                        </Text>
+                      )}
+                    </Group>
+                  </Group>
+
+                  <Text size="sm" c="black" fw={500} mb="xs">
+                    Evaluator: {evaluation.evaluator_name || 'Unknown'}
+                  </Text>
+
+                  {evaluation.notes && (
+                    <Paper p="xs" style={{ backgroundColor: '#f1f3f4', marginBottom: '8px' }}>
+                      <Text size="sm" c="black" fs="italic">
+                        "{evaluation.notes}"
+                      </Text>
+                    </Paper>
+                  )}
+
+                  {/* Individual Ratings */}
+                  {evaluation.ratings && evaluation.ratings.length > 0 && (
+                    <div>
+                      <Text size="xs" c="dimmed" fw={500} mb="xs">Individual Ratings:</Text>
+                      <Group gap="sm">
+                        {evaluation.ratings.map((rating, idx) => (
+                          <Paper key={idx} p="xs" style={{ backgroundColor: 'white', textAlign: 'center', minWidth: '80px' }}>
+                            <Text size="xs" c="dimmed">
+                              {rating.criteria}
+                            </Text>
+                            <Text size="sm" c="black" fw={600}>
+                              {rating.time ? rating.time : rating.rating.toFixed(1)}
+                            </Text>
+                          </Paper>
+                        ))}
+                      </Group>
+                    </div>
+                  )}
+                </Paper>
+              ))}
+            </Stack>
+          </Stack>
+        )}
+      </Modal>
     </Stack>
   );
 };
