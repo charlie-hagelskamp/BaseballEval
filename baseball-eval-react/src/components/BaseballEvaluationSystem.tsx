@@ -63,7 +63,7 @@ export const BaseballEvaluationSystem: React.FC = () => {
         </Group>
 
         <Tabs 
-          defaultValue="recent" 
+          defaultValue="heatmap" 
           color="yellow"
           styles={{
             list: {
@@ -90,16 +90,20 @@ export const BaseballEvaluationSystem: React.FC = () => {
           }}
         >
           <Tabs.List>
+            <Tabs.Tab value="heatmap" leftSection={<IconTable size={16} />}>
+              All Players Heatmap
+            </Tabs.Tab>
             <Tabs.Tab value="recent" leftSection={<IconChartBar size={16} />}>
               Recent Evaluations
             </Tabs.Tab>
             <Tabs.Tab value="player" leftSection={<IconUser size={16} />}>
               Player Profile
             </Tabs.Tab>
-            <Tabs.Tab value="heatmap" leftSection={<IconTable size={16} />}>
-              All Players Heatmap
-            </Tabs.Tab>
           </Tabs.List>
+
+          <Tabs.Panel value="heatmap" pt="md">
+            <Heatmap evaluations={evaluations} loading={loading} />
+          </Tabs.Panel>
 
           <Tabs.Panel value="recent" pt="md">
             <RecentEvaluations evaluations={evaluations} loading={loading} />
@@ -107,10 +111,6 @@ export const BaseballEvaluationSystem: React.FC = () => {
 
           <Tabs.Panel value="player" pt="md">
             <PlayerProfile evaluations={evaluations} loading={loading} />
-          </Tabs.Panel>
-
-          <Tabs.Panel value="heatmap" pt="md">
-            <Heatmap evaluations={evaluations} loading={loading} />
           </Tabs.Panel>
         </Tabs>
       </Paper>
