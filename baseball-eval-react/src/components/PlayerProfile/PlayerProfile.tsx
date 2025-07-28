@@ -198,24 +198,27 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ evaluations, loadi
                 </Group>
 
                 {/* Individual Scores Breakdown */}
-                <div style={{ marginTop: '12px' }}>
-                  <Table>
-                    <Table.Tbody>
-                      <Table.Tr>
-                        {Object.entries(evaluation.individual_scores).map(([criterion, score]) => (
-                          <Table.Td key={criterion} style={{ textAlign: 'center', padding: '4px 8px' }}>
-                            <Text size="xs" c="dimmed" fw={500}>
-                              {criterion.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                            </Text>
-                            <Text size="sm" c="black" fw={600}>
-                              {score}
-                            </Text>
-                          </Table.Td>
-                        ))}
-                      </Table.Tr>
-                    </Table.Tbody>
-                  </Table>
-                </div>
+                {evaluation.ratings && evaluation.ratings.length > 0 && (
+                  <div style={{ marginTop: '12px' }}>
+                    <Text size="xs" c="dimmed" fw={500} mb="xs">Individual Ratings:</Text>
+                    <Table>
+                      <Table.Tbody>
+                        <Table.Tr>
+                          {evaluation.ratings.map((rating, idx) => (
+                            <Table.Td key={idx} style={{ textAlign: 'center', padding: '4px 8px' }}>
+                              <Text size="xs" c="dimmed" fw={500}>
+                                {rating.criteria}
+                              </Text>
+                              <Text size="sm" c="black" fw={600}>
+                                {rating.time ? rating.time : rating.rating.toFixed(1)}
+                              </Text>
+                            </Table.Td>
+                          ))}
+                        </Table.Tr>
+                      </Table.Tbody>
+                    </Table>
+                  </div>
+                )}
               </Card>
             ))}
           </Stack>
