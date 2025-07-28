@@ -80,7 +80,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ evaluations, loading }) => {
     if (evaluationType === 'name' || evaluationType === 'overall') return;
     
     const playerEvals = evaluations.filter(
-      eval => eval.player_name === playerName && eval.evaluation_type === evaluationType
+      evaluation => evaluation.player_name === playerName && evaluation.evaluation_type === evaluationType
     );
     
     if (playerEvals.length > 0) {
@@ -267,7 +267,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ evaluations, loading }) => {
                   Total Evaluations: {selectedPlayerDetails.evaluations.length}
                 </Text>
                 <Badge color="blue" size="lg">
-                  Avg: {(selectedPlayerDetails.evaluations.reduce((sum, eval) => sum + eval.average_score, 0) / selectedPlayerDetails.evaluations.length).toFixed(1)}
+                  Avg: {(selectedPlayerDetails.evaluations.reduce((sum, evaluation) => sum + evaluation.average_score, 0) / selectedPlayerDetails.evaluations.length).toFixed(1)}
                 </Badge>
               </Group>
             </Paper>
