@@ -198,22 +198,24 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ evaluations, loadi
                 </Group>
 
                 {/* Individual Scores Breakdown */}
-                <Table size="xs" mt="sm">
-                  <Table.Tbody>
-                    <Table.Tr>
-                      {Object.entries(evaluation.individual_scores).map(([criterion, score]) => (
-                        <Table.Td key={criterion} style={{ textAlign: 'center', padding: '4px 8px' }}>
-                          <Text size="xs" c="dimmed" fw={500}>
-                            {criterion.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                          </Text>
-                          <Text size="sm" c="black" fw={600}>
-                            {score}
-                          </Text>
-                        </Table.Td>
-                      ))}
-                    </Table.Tr>
-                  </Table.Tbody>
-                </Table>
+                <div style={{ marginTop: '12px' }}>
+                  <Table>
+                    <Table.Tbody>
+                      <Table.Tr>
+                        {Object.entries(evaluation.individual_scores).map(([criterion, score]) => (
+                          <Table.Td key={criterion} style={{ textAlign: 'center', padding: '4px 8px' }}>
+                            <Text size="xs" c="dimmed" fw={500}>
+                              {criterion.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </Text>
+                            <Text size="sm" c="black" fw={600}>
+                              {score}
+                            </Text>
+                          </Table.Td>
+                        ))}
+                      </Table.Tr>
+                    </Table.Tbody>
+                  </Table>
+                </div>
               </Card>
             ))}
           </Stack>
