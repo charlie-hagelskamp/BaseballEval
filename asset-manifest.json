@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/BaseballEval/baseball-eval-react/static/css/main.33af88f0.css",
-    "main.js": "/BaseballEval/baseball-eval-react/static/js/main.fde24c54.js",
-    "static/js/453.c34a7b76.chunk.js": "/BaseballEval/baseball-eval-react/static/js/453.c34a7b76.chunk.js",
-    "index.html": "/BaseballEval/baseball-eval-react/index.html",
-    "main.33af88f0.css.map": "/BaseballEval/baseball-eval-react/static/css/main.33af88f0.css.map",
-    "main.fde24c54.js.map": "/BaseballEval/baseball-eval-react/static/js/main.fde24c54.js.map",
-    "453.c34a7b76.chunk.js.map": "/BaseballEval/baseball-eval-react/static/js/453.c34a7b76.chunk.js.map"
+    "main.css": "/BaseballEval/static/css/main.33af88f0.css",
+    "main.js": "/BaseballEval/static/js/main.b3ac48d4.js",
+    "static/js/453.c34a7b76.chunk.js": "/BaseballEval/static/js/453.c34a7b76.chunk.js",
+    "index.html": "/BaseballEval/index.html",
+    "main.33af88f0.css.map": "/BaseballEval/static/css/main.33af88f0.css.map",
+    "main.b3ac48d4.js.map": "/BaseballEval/static/js/main.b3ac48d4.js.map",
+    "453.c34a7b76.chunk.js.map": "/BaseballEval/static/js/453.c34a7b76.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.33af88f0.css",
-    "static/js/main.fde24c54.js"
+    "static/js/main.b3ac48d4.js"
   ]
 }
